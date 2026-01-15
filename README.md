@@ -1,5 +1,8 @@
 # For my personal use only, use at your own risk, no support at all
 
+# log
+  1. added udp/quic/kcp tunnel support
+
 <details>
 <summary><h1>original repo readme</h1></summary>
   
