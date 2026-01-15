@@ -12,6 +12,7 @@ import java.util.Objects;
 
 public class GostUtil {
 
+    private static final String GOST_NOT_FOUND_MSG = "not found";
 
     public static GostDto AddLimiters(Long node_id, Long name, String speed) {
         JSONObject data = createLimiterData(name, speed);
@@ -68,21 +69,31 @@ public class GostUtil {
     }
 
     public static GostDto UpdateRemoteService(Long node_id, String name, Integer out_port, String remoteAddr,String protocol, String strategy, String interfaceName) {
-        JSONArray services = new JSONArray();
-        for (String serviceName : buildRemoteServiceNames(name, protocol)) {
-            services.add(createRemoteServiceConfig(serviceName, out_port, remoteAddr, protocol, strategy, interfaceName));
+        String primaryName = buildServiceName(name, protocol);
+        String legacyName = buildLegacyRemoteServiceName(name, protocol, primaryName);
+        GostDto result = updateRemoteServiceByName(node_id, primaryName, out_port, remoteAddr, protocol, strategy, interfaceName);
+        if (legacyName == null) {
+            return result;
         }
-        return WebSocketServer.send_msg(node_id, services, "UpdateService");
+        if (isGostNotFound(result)) {
+            return updateRemoteServiceByName(node_id, legacyName, out_port, remoteAddr, protocol, strategy, interfaceName);
+        }
+        updateRemoteServiceByName(node_id, legacyName, out_port, remoteAddr, protocol, strategy, interfaceName);
+        return result;
     }
 
     public static GostDto DeleteRemoteService(Long node_id, String name, String protocol) {
-        JSONArray data = new JSONArray();
-        for (String serviceName : buildRemoteServiceNames(name, protocol)) {
-            data.add(serviceName);
+        String primaryName = buildServiceName(name, protocol);
+        String legacyName = buildLegacyRemoteServiceName(name, protocol, primaryName);
+        GostDto result = sendRemoteServiceAction(node_id, primaryName, "DeleteService");
+        if (legacyName == null) {
+            return result;
         }
-        JSONObject req = new JSONObject();
-        req.put("services", data);
-        return WebSocketServer.send_msg(node_id, req, "DeleteService");
+        if (isGostNotFound(result)) {
+            return sendRemoteServiceAction(node_id, legacyName, "DeleteService");
+        }
+        sendRemoteServiceAction(node_id, legacyName, "DeleteService");
+        return result;
     }
 
     public static GostDto PauseService(Long node_id, String name) {
@@ -104,23 +115,31 @@ public class GostUtil {
     }
 
     public static GostDto PauseRemoteService(Long node_id, String name, String protocol) {
-        JSONObject data = new JSONObject();
-        JSONArray services = new JSONArray();
-        for (String serviceName : buildRemoteServiceNames(name, protocol)) {
-            services.add(serviceName);
+        String primaryName = buildServiceName(name, protocol);
+        String legacyName = buildLegacyRemoteServiceName(name, protocol, primaryName);
+        GostDto result = sendRemoteServiceAction(node_id, primaryName, "PauseService");
+        if (legacyName == null) {
+            return result;
         }
-        data.put("services", services);
-        return WebSocketServer.send_msg(node_id, data, "PauseService");
+        if (isGostNotFound(result)) {
+            return sendRemoteServiceAction(node_id, legacyName, "PauseService");
+        }
+        sendRemoteServiceAction(node_id, legacyName, "PauseService");
+        return result;
     }
 
     public static GostDto ResumeRemoteService(Long node_id, String name, String protocol) {
-        JSONObject data = new JSONObject();
-        JSONArray services = new JSONArray();
-        for (String serviceName : buildRemoteServiceNames(name, protocol)) {
-            services.add(serviceName);
+        String primaryName = buildServiceName(name, protocol);
+        String legacyName = buildLegacyRemoteServiceName(name, protocol, primaryName);
+        GostDto result = sendRemoteServiceAction(node_id, primaryName, "ResumeService");
+        if (legacyName == null) {
+            return result;
         }
-        data.put("services", services);
-        return WebSocketServer.send_msg(node_id, data, "ResumeService");
+        if (isGostNotFound(result)) {
+            return sendRemoteServiceAction(node_id, legacyName, "ResumeService");
+        }
+        sendRemoteServiceAction(node_id, legacyName, "ResumeService");
+        return result;
     }
 
     public static GostDto AddChains(Long node_id, String name, String remoteAddr, String protocol, String interfaceName) {
@@ -342,6 +361,20 @@ public class GostUtil {
         return data;
     }
 
+    private static GostDto updateRemoteServiceByName(Long node_id, String serviceName, Integer out_port, String remoteAddr, String protocol, String strategy, String interfaceName) {
+        JSONArray services = new JSONArray();
+        services.add(createRemoteServiceConfig(serviceName, out_port, remoteAddr, protocol, strategy, interfaceName));
+        return WebSocketServer.send_msg(node_id, services, "UpdateService");
+    }
+
+    private static GostDto sendRemoteServiceAction(Long node_id, String serviceName, String action) {
+        JSONObject data = new JSONObject();
+        JSONArray services = new JSONArray();
+        services.add(serviceName);
+        data.put("services", services);
+        return WebSocketServer.send_msg(node_id, data, action);
+    }
+
     private static boolean isPortForwarding(Integer fow_type) {
         return fow_type != null && fow_type == 1;
     }
@@ -357,16 +390,19 @@ public class GostUtil {
         return name + "_" + protocol;
     }
 
-    private static String[] buildRemoteServiceNames(String name, String protocol) {
-        String primaryName = buildServiceName(name, protocol);
+    private static String buildLegacyRemoteServiceName(String name, String protocol, String primaryName) {
         if (StringUtils.isBlank(protocol) || Objects.equals(protocol, "tls")) {
-            return new String[]{primaryName};
+            return null;
         }
         String legacyName = name + "_tls";
         if (Objects.equals(primaryName, legacyName)) {
-            return new String[]{primaryName};
+            return null;
         }
-        return new String[]{primaryName, legacyName};
+        return legacyName;
+    }
+
+    private static boolean isGostNotFound(GostDto result) {
+        return result != null && StringUtils.containsIgnoreCase(result.getMsg(), GOST_NOT_FOUND_MSG);
     }
 
 }
