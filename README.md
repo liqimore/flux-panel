@@ -1,16 +1,9 @@
+# For my personal use only, use at your own risk, no support at all
+
+<details>
+<summary><h1>original repo readme</h1></summary>
+  
 # flux-panel转发面板 哆啦A梦转发面板
-
-# 赞助商
-<p align="center">
-  <a href="https://vps.town" style="margin: 0 20px; text-align:center;">
-    <img src="./doc/vpstown.png" width="300">
-  </a>
-
-  <a href="https://whmcs.as211392.com" style="margin: 0 20px; text-align:center;">
-    <img src="./doc/as211392.png" width="300">
-  </a>
-</p>
-
 
 本项目基于 [go-gost/gost](https://github.com/go-gost/gost) 和 [go-gost/x](https://github.com/go-gost/x) 两个开源库，实现了转发面板。
 ---
@@ -55,6 +48,7 @@ curl -L https://raw.githubusercontent.com/bqlpfy/flux-panel/refs/heads/beta/inst
 
 > ⚠️ 首次登录后请立即修改默认密码！
 
+</details>
 
 ## 免责声明
 
@@ -79,15 +73,4 @@ curl -L https://raw.githubusercontent.com/bqlpfy/flux-panel/refs/heads/beta/inst
 
 
 请务必在合法、合规、安全的前提下使用本项目。  
-
----
-## ⭐ 喝杯咖啡！（USDT）
-
-| 网络       | 地址                                                                 |
-|------------|----------------------------------------------------------------------|
-| BNB(BEP20) | `0x755492c03728851bbf855daa28a1e089f9aca4d1`                          |
-| TRC20      | `TYh2L3xxXpuJhAcBWnt3yiiADiCSJLgUm7`                                  |
-| Aptos      | `0xf2f9fb14749457748506a8281628d556e8540d1eb586d202cd8b02b99d369ef8`  |
-
-[![Star History Chart](https://api.star-history.com/svg?repos=bqlpfy/flux-panel&type=Date)](https://www.star-history.com/#bqlpfy/flux-panel&Date)
 
