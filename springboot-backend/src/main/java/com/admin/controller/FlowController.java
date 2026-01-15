@@ -305,7 +305,7 @@ public class FlowController extends BaseController {
             if (tunnel != null){
                 GostUtil.PauseService(tunnel.getInNodeId(), name);
                 if (tunnel.getType() == 2){
-                    GostUtil.PauseRemoteService(tunnel.getOutNodeId(), name);
+                    GostUtil.PauseRemoteService(tunnel.getOutNodeId(), name, tunnel.getProtocol());
                 }
             }
             forward.setStatus(0);

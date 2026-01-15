@@ -594,7 +594,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Node outNode = nodeService.getNodeById(tunnel.getOutNodeId());
         if (outNode != null) {
             GostUtil.DeleteChains(inNode.getId(), serviceName);
-            GostUtil.DeleteRemoteService(outNode.getId(), serviceName);
+            GostUtil.DeleteRemoteService(outNode.getId(), serviceName, tunnel.getProtocol());
         }
     }
 

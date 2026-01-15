@@ -63,7 +63,7 @@ public class GostUtil {
 
     public static GostDto AddRemoteService(Long node_id, String name, Integer out_port, String remoteAddr,  String protocol, String strategy, String interfaceName) {
         JSONObject data = new JSONObject();
-        data.put("name", name + "_tls");
+        data.put("name", buildServiceName(name, protocol));
         data.put("addr", ":" + out_port);
 
         if (StringUtils.isNotBlank(interfaceName)) {
@@ -78,6 +78,11 @@ public class GostUtil {
         data.put("handler", handler);
         JSONObject listener = new JSONObject();
         listener.put("type", protocol);
+        if (Objects.equals(protocol, "udp")) {
+            JSONObject metadata = new JSONObject();
+            metadata.put("keepAlive", true);
+            listener.put("metadata", metadata);
+        }
         data.put("listener", listener);
         JSONObject forwarder = new JSONObject();
         JSONArray nodes = new JSONArray();
@@ -109,7 +114,7 @@ public class GostUtil {
 
     public static GostDto UpdateRemoteService(Long node_id, String name, Integer out_port, String remoteAddr,String protocol, String strategy, String interfaceName) {
         JSONObject data = new JSONObject();
-        data.put("name", name + "_tls");
+        data.put("name", buildServiceName(name, protocol));
         data.put("addr", ":" + out_port);
 
         if (StringUtils.isNotBlank(interfaceName)) {
@@ -124,6 +129,11 @@ public class GostUtil {
         data.put("handler", handler);
         JSONObject listener = new JSONObject();
         listener.put("type", protocol);
+        if (Objects.equals(protocol, "udp")) {
+            JSONObject metadata = new JSONObject();
+            metadata.put("keepAlive", true);
+            listener.put("metadata", metadata);
+        }
         data.put("listener", listener);
         JSONObject forwarder = new JSONObject();
         JSONArray nodes = new JSONArray();
@@ -153,9 +163,9 @@ public class GostUtil {
         return WebSocketServer.send_msg(node_id, services, "UpdateService");
     }
 
-    public static GostDto DeleteRemoteService(Long node_id, String name) {
+    public static GostDto DeleteRemoteService(Long node_id, String name, String protocol) {
         JSONArray data = new JSONArray();
-        data.add(name + "_tls");
+        data.add(buildServiceName(name, protocol));
         JSONObject req = new JSONObject();
         req.put("services", data);
         return WebSocketServer.send_msg(node_id, req, "DeleteService");
@@ -179,18 +189,18 @@ public class GostUtil {
         return WebSocketServer.send_msg(node_id, data, "ResumeService");
     }
 
-    public static GostDto PauseRemoteService(Long node_id, String name) {
+    public static GostDto PauseRemoteService(Long node_id, String name, String protocol) {
         JSONObject data = new JSONObject();
         JSONArray services = new JSONArray();
-        services.add(name + "_tls");
+        services.add(buildServiceName(name, protocol));
         data.put("services", services);
         return WebSocketServer.send_msg(node_id, data, "PauseService");
     }
 
-    public static GostDto ResumeRemoteService(Long node_id, String name) {
+    public static GostDto ResumeRemoteService(Long node_id, String name, String protocol) {
         JSONObject data = new JSONObject();
         JSONArray services = new JSONArray();
-        services.add(name + "_tls");
+        services.add(buildServiceName(name, protocol));
         data.put("services", services);
         return WebSocketServer.send_msg(node_id, data, "ResumeService");
     }
@@ -392,6 +402,13 @@ public class GostUtil {
 
     private static boolean isTunnelForwarding(Integer fow_type) {
         return fow_type != null && fow_type != 1;
+    }
+
+    private static String buildServiceName(String name, String protocol) {
+        if (StringUtils.isBlank(protocol)) {
+            return name;
+        }
+        return name + "_" + protocol;
     }
 
 }

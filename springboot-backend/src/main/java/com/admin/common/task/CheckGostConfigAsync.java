@@ -81,11 +81,11 @@ public class CheckGostConfigAsync {
                         }
 
 
-                        if (Objects.equals(type, "tls")) {
+                        if (isTunnelProtocol(type)) {
                             Forward forward = forwardService.getById(forwardId);
                             if (forward == null) {
                                 log.info("删除孤立的服务: {} (节点: {})", service.getName(), node.getId());
-                                GostUtil.DeleteRemoteService(node.getId(), forwardId+"_"+userId+"_"+userTunnelId);
+                                GostUtil.DeleteRemoteService(node.getId(), forwardId + "_" + userId + "_" + userTunnelId, type);
                             }
                         }
 
@@ -212,5 +212,17 @@ public class CheckGostConfigAsync {
      */
     private String[] parseServiceName(String serviceName) {
         return serviceName.split("_");
+    }
+
+    private boolean isTunnelProtocol(String type) {
+        return Objects.equals(type, "tls")
+                || Objects.equals(type, "wss")
+                || Objects.equals(type, "tcp")
+                || Objects.equals(type, "mtls")
+                || Objects.equals(type, "mwss")
+                || Objects.equals(type, "mtcp")
+                || Objects.equals(type, "udp")
+                || Objects.equals(type, "quic")
+                || Objects.equals(type, "kcp");
     }
 }

@@ -233,7 +233,11 @@ public class ResetFlowAsync {
 
         GostUtil.PauseService(tunnel.getInNodeId(), buildServiceName(forward.getId(), forward.getUserId(), userTunnelId));
         if (tunnel.getType() == 2){
-            GostUtil.PauseRemoteService(tunnel.getOutNodeId(), buildServiceName(forward.getId(), forward.getUserId(), userTunnelId));
+            GostUtil.PauseRemoteService(
+                    tunnel.getOutNodeId(),
+                    buildServiceName(forward.getId(), forward.getUserId(), userTunnelId),
+                    tunnel.getProtocol()
+            );
         }
     }
 
