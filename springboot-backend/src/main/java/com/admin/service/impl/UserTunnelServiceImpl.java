@@ -314,7 +314,7 @@ public class UserTunnelServiceImpl extends ServiceImpl<UserTunnelMapper, UserTun
             // 2. 如果是隧道转发，删除远端服务
             if (tunnel.getType() == 1 && outNode != null && !outNode.getId().equals(inNode != null ? inNode.getId() : null)) {
                 try {
-                    GostUtil.DeleteRemoteService(outNode.getId(), serviceName);
+                    GostUtil.DeleteRemoteService(outNode.getId(), serviceName, tunnel.getProtocol());
                 } catch (Exception e) {
                     // 远端服务删除失败，记录但继续
                 }

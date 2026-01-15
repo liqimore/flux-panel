@@ -402,7 +402,11 @@ public class ForwardServiceImpl extends ServiceImpl<ForwardMapper, Forward> impl
 
             // 隧道转发需要同时暂停远端服务
             if (tunnel.getType() == TUNNEL_TYPE_TUNNEL_FORWARD && nodeInfo.getOutNode() != null) {
-                GostDto remoteResult = GostUtil.PauseRemoteService(nodeInfo.getOutNode().getId(), serviceName);
+                GostDto remoteResult = GostUtil.PauseRemoteService(
+                        nodeInfo.getOutNode().getId(),
+                        serviceName,
+                        tunnel.getProtocol()
+                );
                 if (!isGostOperationSuccess(remoteResult)) {
                     return R.err(operation + "远端服务失败：" + remoteResult.getMsg());
                 }
@@ -412,7 +416,11 @@ public class ForwardServiceImpl extends ServiceImpl<ForwardMapper, Forward> impl
 
             // 隧道转发需要同时恢复远端服务
             if (tunnel.getType() == TUNNEL_TYPE_TUNNEL_FORWARD && nodeInfo.getOutNode() != null) {
-                GostDto remoteResult = GostUtil.ResumeRemoteService(nodeInfo.getOutNode().getId(), serviceName);
+                GostDto remoteResult = GostUtil.ResumeRemoteService(
+                        nodeInfo.getOutNode().getId(),
+                        serviceName,
+                        tunnel.getProtocol()
+                );
                 if (!isGostOperationSuccess(remoteResult)) {
                     return R.err(operation + "远端服务失败：" + remoteResult.getMsg());
                 }
@@ -992,7 +1000,7 @@ public class ForwardServiceImpl extends ServiceImpl<ForwardMapper, Forward> impl
             R remoteResult = createRemoteService(nodeInfo.getOutNode(), serviceName, forward, tunnel.getProtocol(), forward.getInterfaceName());
             if (remoteResult.getCode() != 0) {
                 GostUtil.DeleteChains(nodeInfo.getInNode().getId(), serviceName);
-                GostUtil.DeleteRemoteService(nodeInfo.getOutNode().getId(), serviceName);
+                GostUtil.DeleteRemoteService(nodeInfo.getOutNode().getId(), serviceName, tunnel.getProtocol());
                 return remoteResult;
             }
         }
@@ -1008,7 +1016,7 @@ public class ForwardServiceImpl extends ServiceImpl<ForwardMapper, Forward> impl
         if (serviceResult.getCode() != 0) {
             GostUtil.DeleteChains(nodeInfo.getInNode().getId(), serviceName);
             if (nodeInfo.getOutNode() != null) {
-                GostUtil.DeleteRemoteService(nodeInfo.getOutNode().getId(), serviceName);
+                GostUtil.DeleteRemoteService(nodeInfo.getOutNode().getId(), serviceName, tunnel.getProtocol());
             }
             return serviceResult;
         }
@@ -1116,7 +1124,7 @@ public class ForwardServiceImpl extends ServiceImpl<ForwardMapper, Forward> impl
             }
 
             if (outNode != null) {
-                GostDto remoteResult = GostUtil.DeleteRemoteService(outNode.getId(), serviceName);
+                GostDto remoteResult = GostUtil.DeleteRemoteService(outNode.getId(), serviceName, oldTunnel.getProtocol());
                 if (!isGostOperationSuccess(remoteResult)) {
                     log.info("删除远程服务失败: {}", remoteResult.getMsg());
                 }
@@ -1146,7 +1154,7 @@ public class ForwardServiceImpl extends ServiceImpl<ForwardMapper, Forward> impl
             }
 
             if (nodeInfo.getOutNode() != null) {
-                GostDto remoteResult = GostUtil.DeleteRemoteService(nodeInfo.getOutNode().getId(), serviceName);
+                GostDto remoteResult = GostUtil.DeleteRemoteService(nodeInfo.getOutNode().getId(), serviceName, tunnel.getProtocol());
                 if (!isGostOperationSuccess(remoteResult)) {
                     return R.err(remoteResult.getMsg());
                 }
